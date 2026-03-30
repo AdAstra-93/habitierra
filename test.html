@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habitierra - Bienes Raíces y Terrenos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #006AFF; /* Azul estilo Zillow */
+            --primary-hover: #0056d6;
+            --bg-color: #f4f5f7;
+            --text-color: #2a2a33;
+            --light-text: #54545a;
+            --white: #ffffff;
+            --border: #d1d1d5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        header {
+            background-color: var(--white);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            margin-left: 20px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1920&q=80') center/cover;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--white);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            max-width: 800px;
+        }
+
+        .search-bar {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.2s;
+        }
+
+        .search-bar button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1280px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Views */
+        #detail-view {
+            display: none; /* Oculto por defecto */
+        }
+
+        /* Grid de Propiedades */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .card-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--white);
+            color: var(--text-color);
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .card-content {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .features {
+            display: flex;
+            gap: 15px;
+            font-size: 15px;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .features i {
+            color: var(--light-text);
+            margin-right: 5px;
+        }
+
+        .address {
+            color: var(--light-text);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .broker {
+            margin-top: auto;
+            font-size: 12px;
+            color: var(--light-text);
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        /* Detail View Styles */
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .detail-gallery {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 30px;
+        }
+
+        .detail-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        .contact-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 90px;
+            height: fit-content;
+        }
+
+        .contact-card button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary { background: var(--primary-color); color: var(--white); }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary-color) !important; color: var(--primary-color); }
+
+        @media (max-width: 768px) {
+            .detail-content { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 32px; }
+            header { flex-direction: column; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="showHome()">
+            <i class="fa-solid fa-layer-group"></i> Habitierra
+        </div>
+        <div class="nav-links">
+            <a href="#" onclick="showHome()">Terrenos</a>
+            <a href="#">Casas</a>
+            <a href="#">Desarrollos</a>
+        </div>
+    </header>
+
+    <div id="home-view">
+        <div class="hero">
+            <h1>El espacio perfecto para tu próximo gran desarrollo o tu casa ideal.</h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar por ciudad, municipio o código postal...">
+                <button><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+        </div>
+
+        <div class="container">
+            <h2 style="margin-bottom: 20px;">Oportunidades Destacadas en México</h2>
+            <div class="grid" id="property-grid">
+                </div>
+        </div>
+    </div>
+
+    <div id="detail-view" class="container">
+        <button class="back-btn" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Volver a resultados</button>
+        
+        <div class="detail-header">
+            <div>
+                <h1 class="price" id="detail-price"></h1>
+                <div class="features" id="detail-features" style="font-size: 18px; margin: 10px 0;"></div>
+                <p class="address" id="detail-address" style="font-size: 18px;"></p>
+            </div>
+            <div>
+                <button style="background:none; border:none; font-size:24px; color:var(--primary-color); cursor:pointer;"><i class="fa-regular fa-heart"></i> Guardar</button>
+            </div>
+        </div>
+
+        <div class="detail-gallery" id="detail-image"></div>
+
+        <div class="detail-content">
+            <div class="main-info">
+                <h2 id="detail-title" style="margin-bottom: 15px;"></h2>
+                <p id="detail-desc" style="color: var(--light-text); font-size: 16px; margin-bottom: 30px;"></p>
+                
+                <h3>Resumen de la propiedad</h3>
+                <ul style="margin: 15px 0 30px 20px; color: var(--light-text); line-height: 1.8;">
+                    <li><strong>Tipo:</strong> <span id="detail-type"></span></li>
+                    <li><strong>Uso de suelo:</strong> Habitacional / Mixto</li>
+                    <li><strong>Estatus legal:</strong> Escriturado</li>
+                    <li><strong>Servicios:</strong> A pie de calle</li>
+                </ul>
+            </div>
+
+            <div class="contact-sidebar">
+                <div class="contact-card">
+                    <h3 style="margin-bottom: 20px;">Contactar al agente</h3>
+                    <input type="text" placeholder="Tu nombre" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid var(--border); border-radius:4px;">
+                    <input type="email" placeholder="Tu correo" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid var(--border); border-radius:4px;">
+                    <input type="tel" placeholder="Tu teléfono" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid var(--border); border-radius:4px;">
+                    <button class="btn-primary">Solicitar Información</button>
+                    <button class="btn-outline">Agendar Recorrido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos falsos de propiedades (Dummy Data) aumentados a 36
+        const properties = [
+            {
+                id: 1, type: 'Casa', status: 'En Venta', price: '$4,250,000 MXN', beds: 3, baths: 2.5, sqm: 180,
+                title: 'Hermosa Casa Moderna con Jardín', address: 'Colonia Del Valle, Benito Juárez, CDMX',
+                desc: 'Increíble casa recién remodelada. Cuenta con amplios ventanales, cocina integral con barra de granito, jardín trasero ideal para mascotas y roof garden privado con asador. Excelente iluminación natural y seguridad 24/7 en calle cerrada.',
+                img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80', broker: 'Inmobiliaria Premium CDMX'
+            },
+            {
+                id: 2, type: 'Departamento', status: 'En Venta', price: '$2,800,000 MXN', beds: 2, baths: 2, sqm: 95,
+                title: 'Departamento de Lujo Vista Panorámica', address: 'Puerta de Hierro, Zapopan, Jalisco',
+                desc: 'Exclusivo departamento en piso 15 con vistas espectaculares a la ciudad. Amenidades de lujo: alberca infinita, gimnasio equipado, salón de eventos y coworking. Acabados premium en madera y mármol.',
+                img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80', broker: 'Occidente Bienes Raíces'
+            },
+            {
+                id: 3, type: 'Terreno', status: 'Oportunidad', price: '$1,150,000 MXN', beds: 0, baths: 0, sqm: 450,
+                title: 'Lote Residencial Listo Para Construir', address: 'Cumbres del Lago, Juriquilla, Querétaro',
+                desc: 'Excelente oportunidad de inversión. Terreno plano, escriturado y libre de gravamen. Ubicado en uno de los fraccionamientos de mayor plusvalía, con servicios subterráneos y club de golf cercano.',
+                img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80', broker: 'Grupo Inversionista Qro'
+            },
+            {
+                id: 4, type: 'Casa de Campo', status: 'En Venta', price: '$6,500,000 MXN', beds: 4, baths: 4, sqm: 350,
+                title: 'Retiro Pacífico Rodeado de Naturaleza', address: 'Valle de Bravo, Estado de México',
+                desc: 'Espectacular propiedad de descanso a solo 15 min del lago. Cuenta con chimenea, terrazas panorámicas, jacuzzi al aire libre y una cabaña de huéspedes independiente. Ideal para fines de semana.',
+                img: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80', broker: 'Valle Exclusive Homes'
+            },
+            {
+                id: 5, type: 'Departamento', status: 'Preventa', price: '$3,100,000 MXN', beds: 1, baths: 1, sqm: 65,
+                title: 'Loft Industrial para Inversión', address: 'Barrio Antiguo, Monterrey, N.L.',
+                desc: 'Loft de diseño industrial en el corazón de la ciudad. Perfecto para Airbnb o jóvenes profesionistas. Edificio inteligente con control de accesos por app, terraza común y lavandería.',
+                img: 'https://images.unsplash.com/photo-1502672260266-1c1e65818329?auto=format&fit=crop&w=800&q=80', broker: 'Norte Capitales'
+            },
+            {
+                id: 6, type: 'Terreno', status: 'En Venta', price: '$850,000 MXN', beds: 0, baths: 0, sqm: 200,
+                title: 'Terreno en Privada con Amenidades', address: 'Conkal, Mérida, Yucatán',
+                desc: 'Lote urbanizado al norte de Mérida. Privada con seguridad, casa club, canchas de pádel y alberca. Zona de altísimo crecimiento y plusvalía asegurada.',
+                img: 'https://images.unsplash.com/photo-1524813686514-a57563d77965?auto=format&fit=crop&w=800&q=80', broker: 'Yuca Tierra Blanca'
+            },
+            {
+                id: 7, type: 'Penthouse', status: 'En Venta', price: '$12,500,000 MXN', beds: 3, baths: 3.5, sqm: 280,
+                title: 'Penthouse Exclusivo con Terraza Privada', address: 'Polanco, Miguel Hidalgo, CDMX',
+                desc: 'Espectacular Penthouse en dos niveles. Pisos de madera de ingeniería, cocina italiana, sistema de domótica completo y terraza de 60m2 con vista al parque. Dos lugares de estacionamiento.',
+                img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80', broker: 'Luxury Real Estate CDMX'
+            },
+            {
+                id: 8, type: 'Casa', status: 'Renta', price: '$25,000 MXN / mes', beds: 3, baths: 2, sqm: 160,
+                title: 'Casa Familiar en Fraccionamiento Cerrado', address: 'Sonata, Lomas de Angelópolis, Puebla',
+                desc: 'Hermosa casa lista para habitar. Incluye mantenimiento. Tres recámaras amplias, la principal con vestidor. Área de TV, cocina equipada y jardín trasero. Acceso a casa club.',
+                img: 'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=800&q=80', broker: 'Puebla Homes'
+            },
+            {
+                id: 9, type: 'Departamento', status: 'Renta', price: '$18,500 MXN / mes', beds: 2, baths: 2, sqm: 110,
+                title: 'Depa Amueblado Cerca de la Playa', address: 'Zona Hotelera, Cancún, Quintana Roo',
+                desc: 'Departamento totalmente amueblado y equipado. A un paso del Mar Caribe. Ideal para ejecutivos o parejas. El complejo cuenta con alberca, seguridad y acceso controlado.',
+                img: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=800&q=80', broker: 'Caribe Rentals'
+            },
+            {
+                id: 10, type: 'Casa', status: 'En Venta', price: '$7,200,000 MXN', beds: 4, baths: 3.5, sqm: 310,
+                title: 'Residencia de Diseño Contemporáneo', address: 'Cumbres, Monterrey, N.L.',
+                desc: 'Casa de autor con acabados de lujo. Techos de doble altura en sala, cocina con isla central de cuarzo, recámara principal en planta baja y espectacular asador en patio.',
+                img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80', broker: 'Regio Propiedades'
+            },
+            {
+                id: 11, type: 'Terreno', status: 'En Venta', price: '$2,500,000 MXN', beds: 0, baths: 0, sqm: 1200,
+                title: 'Macrolote Ideal para Desarrollo', address: 'Playas de Rosarito, Baja California',
+                desc: 'Gran oportunidad para desarrolladores. Terreno con vista al mar y uso de suelo mixto. Fácil acceso desde la carretera escénica. Documentación en regla.',
+                img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80', broker: 'Baja Invest'
+            },
+            {
+                id: 12, type: 'Departamento', status: 'En Venta', price: '$4,100,000 MXN', beds: 2, baths: 2, sqm: 105,
+                title: 'Departamento Nuevo en Zona Río', address: 'Zona Río, Tijuana, B.C.',
+                desc: 'Excelente ubicación a 5 minutos de la garita. Torre nueva con gimnasio, área de asadores y sala de juntas. Ideal para cruce fronterizo diario.',
+                img: 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=800&q=80', broker: 'Frontera Real Estate'
+            },
+            {
+                id: 13, type: 'Casa', status: 'Preventa', price: '$5,500,000 MXN', beds: 3, baths: 3, sqm: 220,
+                title: 'Casa Inteligente en Privada', address: 'Zibatá, El Marqués, Querétaro',
+                desc: 'Propiedad en preventa. Integración total con Alexa/Google Home. Acabados a elegir, 3 lugares de estacionamiento y frente a área verde. Entregas en diciembre.',
+                img: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=800&q=80', broker: 'Qro Desarrollos'
+            },
+            {
+                id: 14, type: 'Villa', status: 'En Venta', price: '$15,000,000 MXN', beds: 5, baths: 5.5, sqm: 550,
+                title: 'Villa Exclusiva frente al Mar', address: 'Punta Mita, Nayarit',
+                desc: 'Espectacular villa de lujo. Acceso privado a la playa, alberca infinita, palapa gigante y cocina de chef. Se entrega completamente amueblada.',
+                img: 'https://images.unsplash.com/photo-1613490908575-fa8340d3fdb6?auto=format&fit=crop&w=800&q=80', broker: 'Nayarit Premium'
+            },
+            {
+                id: 15, type: 'Departamento', status: 'Renta', price: '$35,000 MXN / mes', beds: 2, baths: 2.5, sqm: 140,
+                title: 'Departamento de Lujo en Andares', address: 'Andares, Zapopan, Jalisco',
+                desc: 'Vive en la zona más exclusiva. Acceso directo al centro comercial. Seguridad estricta, valet parking y amenidades de hotel 5 estrellas.',
+                img: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80', broker: 'Guadalajara Living'
+            },
+            {
+                id: 16, type: 'Casa', status: 'En Venta', price: '$2,100,000 MXN', beds: 2, baths: 1.5, sqm: 90,
+                title: 'Acogedora Casa de Una Planta', address: 'Francisco de Montejo, Mérida, Yucatán',
+                desc: 'Casa recién pintada e impermeabilizada. Excelente oportunidad para recién casados. Cerca de avenidas principales, escuelas y supermercados.',
+                img: 'https://images.unsplash.com/photo-1576941089067-2de3ce907156?auto=format&fit=crop&w=800&q=80', broker: 'Yuca Tierra Blanca'
+            },
+            {
+                id: 17, type: 'Terreno', status: 'Oportunidad', price: '$5,000,000 MXN', beds: 0, baths: 0, sqm: 5000,
+                title: 'Terreno Comercial a Pie de Carretera', address: 'Carretera Nacional, Monterrey, N.L.',
+                desc: 'Ideal para plaza comercial o gasolinera. Alto flujo vehicular. Topografía plana e incluye permiso de uso de suelo comercial.',
+                img: 'https://images.unsplash.com/photo-1534237710431-e2fc698436d0?auto=format&fit=crop&w=800&q=80', broker: 'Norte Capitales'
+            },
+            {
+                id: 18, type: 'Departamento', status: 'En Venta', price: '$6,800,000 MXN', beds: 3, baths: 3, sqm: 185,
+                title: 'Amplio Departamento Familiar', address: 'Santa Fe, Cuajimalpa, CDMX',
+                desc: 'Piso bajo con terraza privada. Cuarto de servicio integrado. Áreas comunes incluyen ludoteca, cancha de tenis y alberca techada.',
+                img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80', broker: 'Inmobiliaria Premium CDMX'
+            },
+            {
+                id: 19, type: 'Casa de Campo', status: 'En Venta', price: '$8,500,000 MXN', beds: 4, baths: 4, sqm: 400,
+                title: 'Hacienda Colonial Remodelada', address: 'San Miguel de Allende, Guanajuato',
+                desc: 'Arquitectura colonial auténtica con comodidades modernas. Patio central con fuente, bóvedas de cañón, terrazas y un gran jardín con árboles frutales.',
+                img: 'https://images.unsplash.com/photo-1590089415225-401ed6f9db8e?auto=format&fit=crop&w=800&q=80', broker: 'Colonial Homes SMA'
+            },
+            {
+                id: 20, type: 'Departamento', status: 'Preventa', price: '$2,400,000 MXN', beds: 1, baths: 1, sqm: 55,
+                title: 'Estudio Eco-Chic Cerca de la Playa', address: 'Aldea Zama, Tulum, Quintana Roo',
+                desc: 'Excelente retorno de inversión para rentas vacacionales. Paneles solares, acabados en chukum, alberca tipo cenote y gimnasio de selva.',
+                img: 'https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80', broker: 'Tulum Invest'
+            },
+            {
+                id: 21, type: 'Casa', status: 'Renta', price: '$12,000 MXN / mes', beds: 3, baths: 2, sqm: 120,
+                title: 'Casa Segura y Céntrica', address: 'Centro, Aguascalientes, Ags.',
+                desc: 'Casa amplia a pocas cuadras del centro histórico. Cuenta con cochera techada para un auto, cocina integral y patio de servicio techado.',
+                img: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80', broker: 'Bienes Raíces Hidrocálidos'
+            },
+            {
+                id: 22, type: 'Terreno', status: 'En Venta', price: '$450,000 MXN', beds: 0, baths: 0, sqm: 160,
+                title: 'Lote Económico para Construir', address: 'San Mateo Atenco, Estado de México',
+                desc: 'Lote habitacional con servicios a pie de calle. Cerca de vialidades rápidas a Toluca y CDMX. Papeles en regla.',
+                img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80', broker: 'Estado Inmuebles'
+            },
+            {
+                id: 23, type: 'Departamento', status: 'En Venta', price: '$5,900,000 MXN', beds: 2, baths: 2, sqm: 130,
+                title: 'Depa Vintage en Edificio Clásico', address: 'Condesa, Cuauhtémoc, CDMX',
+                desc: 'Encantador departamento en la zona más bohemia de la ciudad. Pisos de pasta originales, techos altos, muy iluminado y balcón a la calle.',
+                img: 'https://images.unsplash.com/photo-1499916078039-922301b0eb9b?auto=format&fit=crop&w=800&q=80', broker: 'RomaCondesa Brokers'
+            },
+            {
+                id: 24, type: 'Casa', status: 'En Venta', price: '$3,800,000 MXN', beds: 3, baths: 2.5, sqm: 175,
+                title: 'Casa Familiar Cerca de Escuelas', address: 'Metepec, Estado de México',
+                desc: 'Dentro de un fraccionamiento tranquilo con parque central. Amplia sala de estar, comedor, cocina abierta y patio con loseta. Vigilancia 24 hrs.',
+                img: 'https://images.unsplash.com/photo-1605276374104-a628a5049d50?auto=format&fit=crop&w=800&q=80', broker: 'Valle de Toluca Bienes Raíces'
+            },
+            {
+                id: 25, type: 'Oficina', status: 'Renta', price: '$40,000 MXN / mes', beds: 0, baths: 2, sqm: 150,
+                title: 'Oficina Corporativa Equipada', address: 'Paseo de la Reforma, CDMX',
+                desc: 'Espacio de trabajo listo para usar en edificio AAA. Recepción, 3 privados, sala de juntas y área abierta de trabajo. Seguridad biométrica.',
+                img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', broker: 'Corporate CDMX'
+            },
+            {
+                id: 26, type: 'Casa', status: 'Oportunidad', price: '$1,900,000 MXN', beds: 3, baths: 1, sqm: 105,
+                title: 'Casa para Remodelar', address: 'Jardines de la Paz, Guadalajara, Jalisco',
+                desc: 'Excelente oportunidad para inversionistas o arquitectos. Estructura sólida, requiere actualización de baños y cocina. Gran potencial.',
+                img: 'https://images.unsplash.com/photo-1510627489930-0c1b0bfb6785?auto=format&fit=crop&w=800&q=80', broker: 'Gdl Oportunidades'
+            },
+            {
+                id: 27, type: 'Departamento', status: 'En Venta', price: '$8,200,000 MXN', beds: 3, baths: 3, sqm: 210,
+                title: 'Lujoso Depa Frente a la Marina', address: 'Marina Vallarta, Puerto Vallarta, Jalisco',
+                desc: 'Vistas inigualables a los yates y al atardecer. Amplia terraza perimetral, cocina de alta gama y acceso al club de yates.',
+                img: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80', broker: 'Vallarta Costa'
+            },
+            {
+                id: 28, type: 'Terreno', status: 'Preventa', price: '$950,000 MXN', beds: 0, baths: 0, sqm: 250,
+                title: 'Lote en Exclusivo Desarrollo', address: 'Altozano, Morelia, Michoacán',
+                desc: 'Últimos lotes en la nueva etapa del desarrollo. Rodeado de áreas verdes, lagos artificiales y casa club con alberca y gimnasio.',
+                img: 'https://images.unsplash.com/photo-1524813686514-a57563d77965?auto=format&fit=crop&w=800&q=80', broker: 'Michoacán Inversiones'
+            },
+            {
+                id: 29, type: 'Casa', status: 'En Venta', price: '$9,800,000 MXN', beds: 5, baths: 4.5, sqm: 450,
+                title: 'Mansión en Club de Golf', address: 'Bosque Real, Huixquilucan, Estado de México',
+                desc: 'Residencia majestuosa con vista al hoyo 18. Cine en casa, salón de juegos, cantina y estacionamiento techado para 4 autos. Seguridad de primer nivel.',
+                img: 'https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=800&q=80', broker: 'Luxury State of Mexico'
+            },
+            {
+                id: 30, type: 'Departamento', status: 'Renta', price: '$14,000 MXN / mes', beds: 1, baths: 1, sqm: 60,
+                title: 'Loft Moderno para Solteros', address: 'La Paz, Puebla, Puebla',
+                desc: 'Loft con diseño abierto, balcón y excelente iluminación. Incluye cuota de mantenimiento y agua. Edificio pet-friendly.',
+                img: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?auto=format&fit=crop&w=800&q=80', broker: 'Puebla Homes'
+            },
+            {
+                id: 31, type: 'Casa', status: 'En Venta', price: '$2,950,000 MXN', beds: 3, baths: 2, sqm: 140,
+                title: 'Casa Nueva en Fraccionamiento', address: 'Viñedos, Torreón, Coahuila',
+                desc: 'Estrena casa en una de las zonas de mayor plusvalía de La Laguna. Excelentes acabados, preparación para mini splits y amplio patio.',
+                img: 'https://images.unsplash.com/photo-1602343168117-bb8ffe3e2e9f?auto=format&fit=crop&w=800&q=80', broker: 'Laguna Inmobiliaria'
+            },
+            {
+                id: 32, type: 'Terreno', status: 'En Venta', price: '$3,200,000 MXN', beds: 0, baths: 0, sqm: 800,
+                title: 'Terreno Rústico con Cenote', address: 'Valladolid, Yucatán',
+                desc: 'Propiedad única. Terreno rodeado de selva con su propio cenote cerrado de aguas cristalinas. Ideal para proyecto de ecoturismo.',
+                img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80', broker: 'Eco Yuca Tierra'
+            },
+            {
+                id: 33, type: 'Departamento', status: 'Oportunidad', price: '$1,650,000 MXN', beds: 2, baths: 1, sqm: 70,
+                title: 'Depa Céntrico a Buen Precio', address: 'Obrera, Cuauhtémoc, CDMX',
+                desc: 'Aprovecha este departamento con ubicación inmejorable. Cerca de metros y avenidas principales. Ideal para vivir o rentar.',
+                img: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80', broker: 'Inmobiliaria Premium CDMX'
+            },
+            {
+                id: 34, type: 'Casa de Campo', status: 'En Venta', price: '$4,500,000 MXN', beds: 3, baths: 3, sqm: 280,
+                title: 'Cabaña de Lujo en el Bosque', address: 'Mazamitla, Jalisco',
+                desc: 'Hermosa cabaña de madera y piedra. Amplia terraza con asador, chimenea interior y vistas increíbles a la Sierra del Tigre.',
+                img: 'https://images.unsplash.com/photo-1587061949409-02df41d5e562?auto=format&fit=crop&w=800&q=80', broker: 'Occidente Bienes Raíces'
+            },
+            {
+                id: 35, type: 'Casa', status: 'Preventa', price: '$5,100,000 MXN', beds: 4, baths: 3, sqm: 200,
+                title: 'Diseño Minimalista', address: 'Juriquilla, Querétaro',
+                desc: 'Arquitectura vanguardista con amplios espacios abiertos. Cuarto de servicio, family room y jardín. Entrega en 6 meses.',
+                img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80', broker: 'Grupo Inversionista Qro'
+            },
+            {
+                id: 36, type: 'Departamento', status: 'En Venta', price: '$11,000,000 MXN', beds: 3, baths: 3.5, sqm: 250,
+                title: 'Lujo y Confort en Torres Altas', address: 'San Pedro Garza García, N.L.',
+                desc: 'Vive en el municipio más exclusivo. Torre con amenidades de clase mundial. Vistas al Cerro de la Silla y acabados de diseñador.',
+                img: 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=800&q=80', broker: 'Norte Capitales'
+            }
+        ];
+
+        // Elementos del DOM
+        const grid = document.getElementById('property-grid');
+        const homeView = document.getElementById('home-view');
+        const detailView = document.getElementById('detail-view');
+
+        // Renderizar las tarjetas
+        function renderProperties() {
+            grid.innerHTML = '';
+            properties.forEach(prop => {
+                // Generar los iconos dependiendo si es casa/depa u oficina/terreno
+                let featuresHTML = '';
+                if (prop.type === 'Terreno' || prop.type === 'Oficina') {
+                    featuresHTML = `<span><i class="fa-solid fa-vector-square"></i> ${prop.sqm} m²</span>`;
+                } else {
+                    featuresHTML = `
+                        <span><i class="fa-solid fa-bed"></i> ${prop.beds} rec</span>
+                        <span><i class="fa-solid fa-bath"></i> ${prop.baths} ba</span>
+                        <span><i class="fa-solid fa-vector-square"></i> ${prop.sqm} m²</span>
+                    `;
+                }
+
+                const cardHTML = `
+                    <div class="card" onclick="showDetail(${prop.id})">
+                        <div class="card-img" style="background-image: url('${prop.img}');">
+                            <span class="badge">${prop.status}</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="price">${prop.price}</div>
+                            <div class="features">${featuresHTML}</div>
+                            <div class="address">${prop.address}</div>
+                            <div class="broker">Ofrecido por: ${prop.broker}</div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHTML;
+            });
+        }
+
+        // Navegación a Detalles
+        function showDetail(id) {
+            const prop = properties.find(p => p.id === id);
+            
+            // Inyectar info
+            document.getElementById('detail-price').innerText = prop.price;
+            document.getElementById('detail-address').innerText = prop.address;
+            document.getElementById('detail-title').innerText = prop.title;
+            document.getElementById('detail-desc').innerText = prop.desc;
+            document.getElementById('detail-type').innerText = prop.type;
+            document.getElementById('detail-image').style.backgroundImage = `url('${prop.img}')`;
+
+            let featuresHTML = '';
+            if (prop.type === 'Terreno' || prop.type === 'Oficina') {
+                featuresHTML = `<span><i class="fa-solid fa-vector-square"></i> ${prop.sqm} m² de superficie</span>`;
+            } else {
+                featuresHTML = `
+                    <span><i class="fa-solid fa-bed"></i> ${prop.beds} recámaras</span> • 
+                    <span><i class="fa-solid fa-bath"></i> ${prop.baths} baños</span> • 
+                    <span><i class="fa-solid fa-vector-square"></i> ${prop.sqm} m²</span>
+                `;
+            }
+            document.getElementById('detail-features').innerHTML = featuresHTML;
+
+            // Cambiar vista
+            homeView.style.display = 'none';
+            detailView.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // Navegación de regreso a Inicio
+        function showHome() {
+            detailView.style.display = 'none';
+            homeView.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // Inicializar
+        renderProperties();
+    </script>
+</body>
+</html>
